@@ -1,0 +1,82 @@
+1.
+ALTER TABLE movies DROP CONSTRAINT movies_pkey;
+ALTER TABLE movies ADD COLUMN movie_id int;
+UPDATE movies SET movie_id = 1 WHERE movie_year = 1985;
+UPDATE movies SET movie_id = 2 WHERE movie_year = 1986;
+UPDATE movies SET movie_id = 3 WHERE movie_year = 2013;
+UPDATE movies SET movie_id = 4 WHERE movie_year = 1995;
+UPDATE movies SET movie_id = 5 WHERE movie_year = 1989;
+UPDATE movies SET movie_id = 6 WHERE movie_year = 1998;
+ALTER TABLE movies ALTER COLUMN movie_id SET NOT NULL;
+ALTER TABLE movies ADD PRIMARY KEY(movie_id);
+CREATE TABLE movies_and_actors (movie_id int, actor_id int);
+ALTER TABLE movies_and_actors ADD CONSTRAINT movie_id_ref FOREIGN KEY (movie_id) REFERENCES movies (movie_id);
+ALTER TABLE movies_and_actors ADD CONSTRAINT actor_id_ref FOREIGN KEY (actor_id) REFERENCES actors (id);
+INSERT INTO movies_and_actors VALUES(1,4);
+INSERT INTO movies_and_actors VALUES(1,3);
+CREATE TABLE movies_and_producers (movie_id int, producer_id int);
+ALTER TABLE movies_and_producers ADD CONSTRAINT movie_id_ref FOREIGN KEY (movie_id) REFERENCES movies (movie_id);
+ALTER TABLE movies_and_producers ADD CONSTRAINT producer_id_ref FOREIGN KEY (producer_id) REFERENCES producers (id);
+INSERT INTO movies_and_producers VALUES(2,3);
+INSERT INTO movies_and_producers VALUES(2,6);
+
+2.
+ALTER TABLE producers ADD COLUMN better_movie_id int;
+ALTER TABLE producers ADD CONSTRAINT better_movie_id_ref FOREIGN KEY (better_movie_id) REFERENCES movies (movie_id);
+
+3.
+CREATE SEQUENCE movie_id_seq INCREMENT BY 1;
+
+4.
+ALTER TABLE producers ALTER producer_motherland SET DEFAULT 'UK';
+
+5.
+ALTER TABLE actors DROP CONSTRAINT actors_actor_number_of_movies_check;
+
+6.
+ALTER TABLE movies DROP CONSTRAINT movies_movie_budget_check, ADD CONSTRAINT movies_movie_budget_check CHECK (movie_budget > 1000::money);
+
+7.
+CREATE TABLE genres (genre_id SERIAL, genre_name varchar(30));
+INSERT INTO genres (genre_name) VALUES ('детектив');
+INSERT INTO genres (genre_name) VALUES ('фантастика');
+INSERT INTO genres (genre_name) VALUES ('драма');
+ALTER TABLE movies RENAME movie_genres to movie_genre_id;
+UPDATE movies SET movie_genre_id = null WHERE movie_id = 1;
+UPDATE movies SET movie_genre_id = null WHERE movie_id = 2;
+UPDATE movies SET movie_genre_id = null WHERE movie_id = 3;
+UPDATE movies SET movie_genre_id = null WHERE movie_id = 4;
+UPDATE movies SET movie_genre_id = null WHERE movie_id = 5;
+UPDATE movies SET movie_genre_id = null WHERE movie_id = 6;
+ALTER TABLE movies ALTER COLUMN movie_genre_id TYPE int USING movie_genre_id::int;
+ALTER TABLE genres ADD PRIMARY KEY (genre_id);
+ALTER TABLE movies ADD CONSTRAINT genre_ref FOREIGN KEY (movie_genre_id) REFERENCES genres (genre_id);
+UPDATE movies SET movie_genre_id = 2 WHERE movie_id = 1;
+UPDATE movies SET movie_genre_id = 1 WHERE movie_id = 2;
+UPDATE movies SET movie_genre_id = 3 WHERE movie_id = 3;
+UPDATE movies SET movie_genre_id = 4 WHERE movie_id = 4;
+ОШИБКА:  INSERT или UPDATE в таблице "movies" нарушает ограничение внешнего ключа "genre_ref"
+ПОДРОБНОСТИ:  Ключ (movie_genre_id)=(4) отсутствует в таблице "genres".
+UPDATE movies SET movie_genre_id = 3 WHERE movie_id = 4;
+UPDATE movies SET movie_genre_id = 3 WHERE movie_id = 5;
+UPDATE movies SET movie_genre_id = 1 WHERE movie_id = 6;
+
+8.
+CREATE TYPE country AS ENUM ('USA', 'UK', 'Russia', 'France', 'Germany');
+ALTER TABLE producers ALTER COLUMN producer_motherland SET DEFAULT 'UK'::country;
+UPDATE producers SET producer_motherland = null WHERE id = 1;
+UPDATE producers SET producer_motherland = null WHERE id = 2;
+UPDATE producers SET producer_motherland = null WHERE id = 3;
+UPDATE producers SET producer_motherland = null WHERE id = 4;
+UPDATE producers SET producer_motherland = null WHERE id = 5;
+UPDATE producers SET producer_motherland = null WHERE id = 6;
+ALTER TABLE producers ALTER COLUMN producer_motherland TYPE country USING producer_motherland::country;
+
+9.
+ALTER TABLE producers ADD CONSTRAINT check_birthday_date CHECK (producer_birthday < CURRENT_TIMESTAMP);
+
+10.
+CREATE INDEX ON actors (actor_name,actor_surname);
+
+11.
+UPDATE movies SET movie_name = 'Film(1998)' WHERE movie_id = 1;
