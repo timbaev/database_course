@@ -1,0 +1,15 @@
+CREATE DATABASE inventory;
+\c inventory
+CREATE TABLE construction (construction_id SERIAL PRIMARY KEY,construction_material varchar(15),construction_base varchar(15));
+CREATE TABLE stead (stead_id SERIAL PRIMARY KEY,stead_land int, CONSTRAINT valid_land CHECK (stead_land > 0 AND stead_land <= 9999999999));
+CREATE TABLE address (address_street varchar(60) PRIMARY KEY,address_district varchar(15),address_line int, CONSTRAINT valid_lend CHECK (address_line > 0 AND address_line <= 99999));
+CREATE TABLE rooms (room_id SERIAL PRIMARY KEY,room_record int, CONSTRAINT valid_record CHECK (room_record > 0 AND room_record <= 99),room_square_part int, CONSTRAINT valid_square_part CHECK (room_square_part > 0), room_size varchar(30),room_name_part varchar(30),room_decoration varchar(60),room_height_part int, CONSTRAINT valid_height_part CHECK (room_height_part > 0),room_sections int, CONSTRAINT valid_sections CHECK (room_sections > 0 AND room_sections <= 99));
+CREATE TABLE halls (hall_id SERIAL PRIMARY KEY,hall_num int, CONSTRAINT valid_num CHECK (hall_num > 0 AND hall_num <= 9999),hall_storey int, CONSTRAINT valid_storey CHECK (hall_storey > 0 AND hall_storey <= 99),hall_square int, CONSTRAINT valid_square CHECK (hall_square > 0 AND hall_square <= 9999999999), hall_rooms int, CONSTRAINT valid_rooms CHECK (hall_rooms > 0 AND hall_rooms <= 9), hall_level boolean,hall_branch int,hall_balcony int,hall_height int, CONSTRAINT valid_branch CHECK (hall_branch > 0), CONSTRAINT valid_balcony CHECK (hall_balcony > 0), CONSTRAINT valid_height CHECK (hall_height > 0), hall_comment text);
+CREATE TABLE buildings (building_kadastr varchar(20) PRIMARY KEY,building_elevator boolean,building_hall int, CONSTRAINT valid_hall CHECK (building_hall > 0 AND building_hall < 999),building_flow int, CONSTRAINT valid_flow CHECK (building_flow > 0 AND building_flow < 99), building_year int, CONSTRAINT valid_year CHECK (building_year > 1000 AND building_year <= 9999), building_wear int, CONSTRAINT valid_wear CHECK (building_wear >= 0 AND building_wear <= 99), building_comment text, building_picture text, stead_id int, construction_id int, address_street varchar(60));
+ALTER TABLE buildings ADD CONSTRAINT stead_id_ref FOREIGN KEY (stead_id) REFERENCES stead (stead_id);
+ALTER TABLE buildings ADD CONSTRAINT construction_id_ref FOREIGN KEY (construction_id) REFERENCES construction (construction_id);
+ALTER TABLE buildings ADD CONSTRAINT address_street_ref FOREIGN KEY (address_street) REFERENCES address (address_street);
+ALTER TABLE rooms ADD COLUMN hall_id int;
+ALTER TABLE rooms ADD CONSTRAINT hall_id_ref FOREIGN KEY (hall_id) REFERENCES halls (hall_id);
+ALTER TABLE halls ADD COLUMN building_kadastr varchar(20);
+ALTER TABLE halls ADD CONSTRAINT building_kadastr_ref FOREIGN KEY (building_kadastr) REFERENCES buildings (building_kadastr);
